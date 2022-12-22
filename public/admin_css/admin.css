@@ -2,6 +2,7 @@
     --main-text-color: blue;
     --second-text-color: #bbbec5;
     --white: #fff;
+    --jd-admin-light: rgb(244,245,255);
   }
   
   .primary-text {
@@ -14,7 +15,7 @@
   
   #wrapper {
     overflow-x: hidden;
-    background: var(--white);
+    background: var(--jd-admin-light);
   }
   
   #sidebar-wrapper {
