@@ -38,6 +38,7 @@
         {# jQuery #}
         {% block jquery %}{% endblock %}
         
+        {# Datatables #}
         {% block encore_css %}
             {{ encore_entry_link_tags('app') }}
         {% endblock %}
@@ -46,8 +47,9 @@
             {{ encore_entry_script_tags('app') }}
         {% endblock %}
 
-        {# Datatables #}
         {% block Datatables %}{% endblock %}
+
+        {% block tiny %}{% endblock %}
 
         
 
