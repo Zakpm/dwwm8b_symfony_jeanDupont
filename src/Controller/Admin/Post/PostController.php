@@ -5,6 +5,7 @@ namespace App\Controller\Admin\Post;
 
 use App\Entity\Post;
 use App\Form\PostFormType;
+use App\Repository\PostRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -13,13 +14,15 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 class PostController extends AbstractController
 {
     #[Route('/admin/post/list', name: 'admin.post.index')]
-    public function index(): Response
+    public function index(PostRepository $postRepository): Response
     {
-        return $this->render('pages/admin/post/index.html.twig');
+        $posts = $postRepository->findBy([], ['createdAt' => 'desc']);
+        return $this->render('pages/admin/post/index.html.twig', compact('posts'));
+        // return $this->render('pages/admin/post/index.html.twig', array('posts' => $posts));
     }
 
     #[Route('/admin/post/create', name: 'admin.post.create')]
-    public function create(Request $request): Response
+    public function create(Request $request, PostRepository $postRepository): Response
     {
         $post = new Post();
         $form = $this->createForm(PostFormType::class, $post);
@@ -28,11 +31,61 @@ class PostController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()){
 
-            dd("hello");
+            $post->setAuthor($this->getUser());
+            $postRepository->save($post, true);
+            $this->addFlash("success", "Votre article a été créé !");
+            return $this->redirectToRoute("admin.post.index");
         }
 
         return $this->render('pages/admin/post/create.html.twig', [
             "form" => $form->createView(),
         ]);
     }
+
+
+    /**
+     * Cette méthode permet de lire l'article
+     * dont l'identifiant est passé en paramètre à la route
+     */
+    #[Route('/admin/post/{id<[0-9]+>}/show', name: 'admin.post.show')]
+    public function show(Post $post) : Response
+    {
+        
+        return $this->render("pages/admin/post/show.html.twig", compact('post'));
+    }
+
+    #[Route('/admin/post/{id<[0-9]+>}/pulish', name: 'admin.post.publish')]
+    public function publish(Post $post, PostRepository $postRepository) : Response
+    {
+        if ( $post->isIsPublished() == false ) {
+
+            $post->setIsPublished(true);
+            $post->setPublishedAt(new \DateTimeImmutable('now'));
+            $postRepository->save($post, true);
+            $this->addFlash("success", "Votre article vient d'être publié.");
+        }
+        else {
+
+            $post->setIsPublished(false);
+            $post->setPublishedAt(null);
+            $postRepository->save($post, true);
+            $this->addFlash("success", "Votre article vient d'être retiré de la liste de publication.");
+        }
+
+        return $this->redirectToRoute("admin.post.index");
+    }
+
+
+    #[Route('/admin/post/{id<[0-9]+>}/delete', name: 'admin.post.delete')]
+    public function delete(Post $post, Request $request, PostRepository $postRepository) : Response
+    {
+        if ( $this->isCsrfTokenValid('post_' . $post->getId(), $request->request->get('_csrf_token')) ) 
+        {
+            $postRepository->remove($post, true);
+            $this->addFlash("success", "L'article numéro " . $post->getId() . " a été supprimé");
+        }
+
+        return $this->redirectToRoute("admin.post.index");
+    }
+
 }
