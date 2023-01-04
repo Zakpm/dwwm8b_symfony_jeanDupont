@@ -5,6 +5,7 @@ namespace App\Controller\Admin\Post;
 
 use App\Entity\Post;
 use App\Form\PostFormType;
+use App\Repository\CategoryRepository;
 use App\Repository\PostRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -22,8 +23,19 @@ class PostController extends AbstractController
     }
 
     #[Route('/admin/post/create', name: 'admin.post.create')]
-    public function create(Request $request, PostRepository $postRepository): Response
+    public function create(
+        Request $request, 
+        PostRepository $postRepository, 
+        CategoryRepository $categoryRepository
+     ): Response
     {
+        if ( ! $categoryRepository->findAll()){
+
+            $this->addFlash("warning", "Vous devez créer au moins une catégorie avant de rédiger des articles.");
+            return $this->redirectToRoute('admin.category.index');
+        }
+
+
         $post = new Post();
         $form = $this->createForm(PostFormType::class, $post);
 
@@ -54,6 +66,7 @@ class PostController extends AbstractController
         return $this->render("pages/admin/post/show.html.twig", compact('post'));
     }
 
+
     #[Route('/admin/post/{id<[0-9]+>}/pulish', name: 'admin.post.publish')]
     public function publish(Post $post, PostRepository $postRepository) : Response
     {
@@ -76,13 +89,37 @@ class PostController extends AbstractController
     }
 
 
+    #[Route('/admin/post/{id<[0-9]+>}/edit', name: 'admin.post.edit')]
+    public function edit(Post $post, Request $request, PostRepository $postRepository) : Response
+    {
+        $form = $this->createForm(PostFormType::class, $post);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            $post->setAuthor($this->getUser());
+            $postRepository->save($post, true);
+            $this->addFlash("success", "L'article numéro " . $post->getId() . " a été modifié.");
+            return $this->redirectToRoute("admin.post.index");
+        }
+
+        return $this->render("pages/admin/post/edit.html.twig", [
+            "form" => $form->createView(),
+            "post" => $post
+        ]);
+    }
+
+
+
+
     #[Route('/admin/post/{id<[0-9]+>}/delete', name: 'admin.post.delete')]
     public function delete(Post $post, Request $request, PostRepository $postRepository) : Response
     {
         if ( $this->isCsrfTokenValid('post_' . $post->getId(), $request->request->get('_csrf_token')) ) 
         {
-            $postRepository->remove($post, true);
             $this->addFlash("success", "L'article numéro " . $post->getId() . " a été supprimé");
+            $postRepository->remove($post, true);
         }
 
         return $this->redirectToRoute("admin.post.index");
