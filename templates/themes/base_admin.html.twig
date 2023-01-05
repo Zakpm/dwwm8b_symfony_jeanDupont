@@ -38,18 +38,25 @@
         {# jQuery #}
         {% block jquery %}{% endblock %}
         
+        {# tiny #}
+        {% block tiny %}{% endblock %}
+
         {# Datatables #}
-        {% block encore_css %}
-            {{ encore_entry_link_tags('app') }}
-        {% endblock %}
-
-        {% block encore_js %}
-            {{ encore_entry_script_tags('app') }}
-        {% endblock %}
-
         {% block datatables %}{% endblock %}
 
-        {% block tiny %}{% endblock %}
+        {# select2 #}
+        {% block select2 %}{% endblock %}
+
+
+        {% block encore_css %}
+        {{ encore_entry_link_tags('app') }}
+        {% endblock %}
+        
+        {% block encore_js %}
+        {{ encore_entry_script_tags('app') }}
+        {% endblock %}
+        
+
 
         
 

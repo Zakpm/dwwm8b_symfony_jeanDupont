@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use App\Entity\User;
 use App\Entity\Category;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\PostRepository;
@@ -75,13 +77,18 @@ class Post
     #[ORM\ManyToOne(inversedBy: 'posts')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Category $category = null;
-
-
-
+    
+    
+    
     #[ORM\ManyToOne(inversedBy: 'posts')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $author = null;
 
+
+    
+    #[ORM\ManyToMany(targetEntity: Tag::class, inversedBy: 'posts')]
+    private Collection $tags;
+    
 
 
     #[ORM\Column(options: array("default" => false))]
@@ -105,9 +112,11 @@ class Post
     private ?\DateTimeImmutable $publishedAt = null;
 
 
+
     public function __construct()
     {
         $this->isPublished = false;
+        $this->tags = new ArrayCollection();
     }
 
 
@@ -259,6 +268,30 @@ class Post
     public function setAuthor(?User $author): self
     {
         $this->author = $author;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Tag>
+     */
+    public function getTags(): Collection
+    {
+        return $this->tags;
+    }
+
+    public function addTag(Tag $tag): self
+    {
+        if (!$this->tags->contains($tag)) {
+            $this->tags->add($tag);
+        }
+
+        return $this;
+    }
+
+    public function removeTag(Tag $tag): self
+    {
+        $this->tags->removeElement($tag);
 
         return $this;
     }

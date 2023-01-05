@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\Post;
 use App\Entity\Category;
+use App\Entity\Tag;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Vich\UploaderBundle\Form\Type\VichImageType;
@@ -26,6 +27,15 @@ class PostFormType extends AbstractType
                 'choice_label' => 'name',
 
                 'placeholder' => "Choisissez une catégorie"
+            ])
+            ->add('tags', EntityType::class, [
+                // looks for choices from this entity
+                'class' => Tag::class,
+            
+                // uses the Category.name property as the visible option string
+                'choice_label' => 'name',
+
+                'multiple' => true,
             ])
             ->add('imageFile', VichImageType::class, [
                 'required'        => false,
