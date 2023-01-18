@@ -44,8 +44,8 @@ class CategoryController extends AbstractController
         ]);
     }
     
-        #[Route('/admin/category/{id<[0-9]+>}/edit', name: 'admin.category.edit', methods: ['GET', 'POST'])]
-        public function edit(Category $category, Request $request, CategoryRepository $categoryRepository) : Response 
+    #[Route('/admin/category/{id<[0-9]+>}/edit', name: 'admin.category.edit', methods: ['GET', 'POST'])]
+    public function edit(Category $category, Request $request, CategoryRepository $categoryRepository) : Response 
         {
             $form = $this->createForm(CategoryFormType::class, $category);
             $form->handleRequest($request);
@@ -64,8 +64,8 @@ class CategoryController extends AbstractController
             ]);
         }
 
-        #[Route('/admin/category/{id<[0-9]+>}/delete', name: 'admin.category.delete', methods: ['POST'])]
-        public function delete(Category $category, Request $request, CategoryRepository $categoryRepository) : Response
+    #[Route('/admin/category/{id<[0-9]+>}/delete', name: 'admin.category.delete', methods: ['POST'])]
+    public function delete(Category $category, Request $request, CategoryRepository $categoryRepository) : Response
         {
             if ($this->isCsrfTokenValid("category_" . $category->getId(), $request->request->get('_csrf_token'))){
 
